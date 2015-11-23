@@ -70,7 +70,7 @@ else()
 endif()
 
 configure_file(
-  ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/WindowsDLLVersion.rc.in
   ${CMAKE_CURRENT_BINARY_DIR}/version.rc
   @ONLY)
 

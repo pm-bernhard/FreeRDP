@@ -39,7 +39,7 @@ set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Include our extra modules
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 # Check for cmake compatibility (enable/disable features)
 include(CheckCmakeCompat)
@@ -826,7 +826,7 @@ endif()
 
 #message("VENDOR: ${VENDOR} CLIENT_VENDOR_PATH: ${CLIENT_VENDOR_PATH} CMAKE_CPACK_INCLUDE_FILE: ${CMAKE_CPACK_INCLUDE_FILE}")
 
-include(${CMAKE_CPACK_INCLUDE_FILE})
+#include(${CMAKE_CPACK_INCLUDE_FILE})
 
 set(FREERDP_PC_LIBS "-lfreerdp -lfreerdp-client")
 set(WINPR_PC_LIBS "-lwinpr")

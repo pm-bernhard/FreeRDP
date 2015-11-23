@@ -32,7 +32,7 @@ set (RC_VERSION_BUILD ${FREERDP_VERSION_REVISION})
 set (RC_VERSION_FILE "${MODULE_NAME}${CMAKE_EXECUTABLE_SUFFIX}" )
 
 configure_file(
-  ${CMAKE_SOURCE_DIR}/cmake/WindowsDLLVersion.rc.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../../cmake/WindowsDLLVersion.rc.in
   ${CMAKE_CURRENT_BINARY_DIR}/version.rc
   @ONLY)
 
