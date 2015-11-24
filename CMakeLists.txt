@@ -727,8 +727,8 @@ if(BUILD_TESTING)
 endif()
 
 # WinPR
-include_directories("${CMAKE_SOURCE_DIR}/winpr/include")
-include_directories("${CMAKE_BINARY_DIR}/winpr/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/winpr/include")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/winpr/include")
 
 add_subdirectory(winpr)
 
@@ -793,7 +793,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "2.8.10")
 
 	set(FREERDP_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/FreeRDP")
 
-	set(FREERDP_INCLUDE_DIR "include")
+	set(FREERDP_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
 
 	# keep for legacy builds
 	set(FREERDP_MONOLITHIC_BUILD OFF)
