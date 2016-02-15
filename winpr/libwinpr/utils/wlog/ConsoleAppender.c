@@ -126,7 +126,9 @@ static BOOL WLog_ConsoleAppender_WriteMessage(wLog* log, wLogAppender* appender,
 				case WLOG_TRACE:
 				case WLOG_DEBUG:
 				case WLOG_INFO:
-					fp = stdout;
+				// FIXME: logging from the clients to stdout does not work (different logger-configuration needed?)
+				//fp = stdout;
+				fp = stderr;
 					break;
 				default:
 					fp = stderr;

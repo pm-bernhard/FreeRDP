@@ -100,6 +100,8 @@ UINT xf_cliprdr_send_client_format_list(xfClipboard* clipboard);
 
 static void xf_cliprdr_check_owner(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_check_owner()");
+
 	Window owner;
 	xfContext* xfc = clipboard->xfc;
 
@@ -117,6 +119,8 @@ static void xf_cliprdr_check_owner(xfClipboard* clipboard)
 
 static BOOL xf_cliprdr_is_self_owned(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_is_self_owned()");
+
 	xfContext* xfc = clipboard->xfc;
 
 	return XGetSelectionOwner(xfc->display, clipboard->clipboard_atom) == xfc->drawable;
@@ -124,6 +128,8 @@ static BOOL xf_cliprdr_is_self_owned(xfClipboard* clipboard)
 
 static xfCliprdrFormat* xf_cliprdr_get_format_by_id(xfClipboard* clipboard, UINT32 formatId)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_get_format_by_id()");
+
 	UINT32 index;
 	xfCliprdrFormat* format;
 
@@ -140,6 +146,8 @@ static xfCliprdrFormat* xf_cliprdr_get_format_by_id(xfClipboard* clipboard, UINT
 
 static xfCliprdrFormat* xf_cliprdr_get_format_by_atom(xfClipboard* clipboard, Atom atom)
 {
+	//WLog_DBG(TAG, " calling xf_cliprdr_get_format_by_atom()");
+
 	int i, j;
 	xfCliprdrFormat* format;
 
@@ -170,6 +178,8 @@ static xfCliprdrFormat* xf_cliprdr_get_format_by_atom(xfClipboard* clipboard, At
  */
 static UINT xf_cliprdr_send_data_request(xfClipboard* clipboard, UINT32 formatId)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_send_data_request()");
+
 	CLIPRDR_FORMAT_DATA_REQUEST request;
 
 	ZeroMemory(&request, sizeof(CLIPRDR_FORMAT_DATA_REQUEST));
@@ -186,6 +196,8 @@ static UINT xf_cliprdr_send_data_request(xfClipboard* clipboard, UINT32 formatId
  */
 static UINT xf_cliprdr_send_data_response(xfClipboard* clipboard, BYTE* data, int size)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_send_data_response()");
+
 	CLIPRDR_FORMAT_DATA_RESPONSE response;
 
 	ZeroMemory(&response, sizeof(CLIPRDR_FORMAT_DATA_RESPONSE));
@@ -199,6 +211,8 @@ static UINT xf_cliprdr_send_data_response(xfClipboard* clipboard, BYTE* data, in
 
 static void xf_cliprdr_get_requested_targets(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_get_requested_targets()");
+
 	int i;
 	Atom atom;
 	BYTE* data = NULL;
@@ -261,6 +275,8 @@ out:
 
 static void xf_cliprdr_process_requested_data(xfClipboard* clipboard, BOOL hasData, BYTE* data, int size)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_process_requested_data()");
+
 	BOOL bSuccess;
 	UINT32 SrcSize;
 	UINT32 DstSize;
@@ -336,6 +352,8 @@ static void xf_cliprdr_process_requested_data(xfClipboard* clipboard, BOOL hasDa
 
 static BOOL xf_cliprdr_get_requested_data(xfClipboard* clipboard, Atom target)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_get_requested_data()");
+
 	Atom type;
 	BYTE* data = NULL;
 	BOOL has_data = FALSE;
@@ -431,6 +449,8 @@ static BOOL xf_cliprdr_get_requested_data(xfClipboard* clipboard, Atom target)
 
 static void xf_cliprdr_append_target(xfClipboard* clipboard, Atom target)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_append_target()");
+
 	int i;
 
 	if (clipboard->numTargets >= ARRAYSIZE(clipboard->targets))
@@ -447,6 +467,8 @@ static void xf_cliprdr_append_target(xfClipboard* clipboard, Atom target)
 
 static void xf_cliprdr_provide_targets(xfClipboard* clipboard, XEvent* respond)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_provide_targets()");
+
 	xfContext* xfc = clipboard->xfc;
 
 	if (respond->xselection.property != None)
@@ -459,6 +481,8 @@ static void xf_cliprdr_provide_targets(xfClipboard* clipboard, XEvent* respond)
 
 static void xf_cliprdr_provide_data(xfClipboard* clipboard, XEvent* respond, BYTE* data, UINT32 size)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_provide_data()");
+
 	xfContext* xfc = clipboard->xfc;
 
 	if (respond->xselection.property != None)
@@ -471,6 +495,8 @@ static void xf_cliprdr_provide_data(xfClipboard* clipboard, XEvent* respond, BYT
 
 static BOOL xf_cliprdr_process_selection_notify(xfClipboard* clipboard, XEvent* xevent)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_process_selection_notify()");
+
 	if (xevent->xselection.target == clipboard->targets[1])
 	{
 		if (xevent->xselection.property == None)
@@ -492,6 +518,8 @@ static BOOL xf_cliprdr_process_selection_notify(xfClipboard* clipboard, XEvent* 
 
 static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard, XEvent* xevent)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_process_selection_request()");
+
 	int fmt;
 	Atom type;
 	UINT32 formatId;
@@ -603,6 +631,8 @@ static BOOL xf_cliprdr_process_selection_request(xfClipboard* clipboard, XEvent*
 
 static BOOL xf_cliprdr_process_selection_clear(xfClipboard* clipboard, XEvent* xevent)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_process_selection_clear()");
+
 	xfContext* xfc = clipboard->xfc;
 
 	if (xf_cliprdr_is_self_owned(clipboard))
@@ -615,6 +645,8 @@ static BOOL xf_cliprdr_process_selection_clear(xfClipboard* clipboard, XEvent* x
 
 static BOOL xf_cliprdr_process_property_notify(xfClipboard* clipboard, XEvent* xevent)
 {
+//  WLog_DBG(TAG, " calling xf_cliprdr_process_property_notify()");
+
 	xfCliprdrFormat* format;
 	xfContext* xfc = clipboard->xfc;
 
@@ -642,6 +674,8 @@ static BOOL xf_cliprdr_process_property_notify(xfClipboard* clipboard, XEvent* x
 
 void xf_cliprdr_handle_xevent(xfContext* xfc, XEvent* event)
 {
+//  WLog_DBG(TAG, " calling xf_cliprdr_handle_xevent()");
+
 	xfClipboard* clipboard;
 
 	if (!xfc || !event)
@@ -707,6 +741,8 @@ void xf_cliprdr_handle_xevent(xfContext* xfc, XEvent* event)
  */
 UINT xf_cliprdr_send_client_capabilities(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_send_client_capabilities()");
+
 	CLIPRDR_CAPABILITIES capabilities;
 	CLIPRDR_GENERAL_CAPABILITY_SET generalCapabilitySet;
 
@@ -729,6 +765,8 @@ UINT xf_cliprdr_send_client_capabilities(xfClipboard* clipboard)
  */
 UINT xf_cliprdr_send_client_format_list(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_send_client_format_list()");
+
 	UINT32 i, numFormats;
 	CLIPRDR_FORMAT* formats = NULL;
 	CLIPRDR_FORMAT_LIST formatList;
@@ -749,8 +787,14 @@ UINT xf_cliprdr_send_client_format_list(xfClipboard* clipboard)
 
 	for (i = 0; i < numFormats; i++)
 	{
+		UINT fID=clipboard->clientFormats[i].formatId;
+		char* fName = clipboard->clientFormats[i].formatName;
 		formats[i].formatId = clipboard->clientFormats[i].formatId;
 		formats[i].formatName = clipboard->clientFormats[i].formatName;
+		//printf("formatId: %d\n", formats[i].formatId);
+		//printf("formatName: %s\n", formats[i].formatName);
+		//WLog_ERR(TAG, "formatId: %d", formats[i].formatId);
+		//WLog_ERR(TAG, "formatName: %s", formats[i].formatName);
 	}
 
 	formatList.msgFlags = CB_RESPONSE_OK;
@@ -778,6 +822,8 @@ UINT xf_cliprdr_send_client_format_list(xfClipboard* clipboard)
  */
 UINT xf_cliprdr_send_client_format_list_response(xfClipboard* clipboard, BOOL status)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_send_client_format_list_response()");
+
 	CLIPRDR_FORMAT_LIST_RESPONSE formatListResponse;
 
 	formatListResponse.msgType = CB_FORMAT_LIST_RESPONSE;
@@ -794,6 +840,8 @@ UINT xf_cliprdr_send_client_format_list_response(xfClipboard* clipboard, BOOL st
  */
 int xf_cliprdr_send_client_format_data_request(xfClipboard* clipboard, UINT32 formatId)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_send_client_format_data_request()");
+
 	CLIPRDR_FORMAT_DATA_REQUEST formatDataRequest;
 
 	formatDataRequest.msgType = CB_FORMAT_DATA_REQUEST;
@@ -812,6 +860,8 @@ int xf_cliprdr_send_client_format_data_request(xfClipboard* clipboard, UINT32 fo
  */
 static UINT xf_cliprdr_monitor_ready(CliprdrClientContext* context, CLIPRDR_MONITOR_READY* monitorReady)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_monitor_ready()");
+
 	xfClipboard* clipboard = (xfClipboard*) context->custom;
 	UINT ret;
 
@@ -832,6 +882,8 @@ static UINT xf_cliprdr_monitor_ready(CliprdrClientContext* context, CLIPRDR_MONI
  */
 static UINT xf_cliprdr_server_capabilities(CliprdrClientContext* context, CLIPRDR_CAPABILITIES* capabilities)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_server_capabilities()");
+
 	//xfClipboard* clipboard = (xfClipboard*) context->custom;
 
 	return CHANNEL_RC_OK;
@@ -844,6 +896,8 @@ static UINT xf_cliprdr_server_capabilities(CliprdrClientContext* context, CLIPRD
  */
 static UINT xf_cliprdr_server_format_list(CliprdrClientContext* context, CLIPRDR_FORMAT_LIST* formatList)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_server_format_list()");
+
 	int i, j;
 	CLIPRDR_FORMAT* format;
 	xfClipboard* clipboard = (xfClipboard*) context->custom;
@@ -928,6 +982,8 @@ static UINT xf_cliprdr_server_format_list(CliprdrClientContext* context, CLIPRDR
  */
 static UINT xf_cliprdr_server_format_list_response(CliprdrClientContext* context, CLIPRDR_FORMAT_LIST_RESPONSE* formatListResponse)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_server_format_list_response()");
+
 	//xfClipboard* clipboard = (xfClipboard*) context->custom;
 
 	return CHANNEL_RC_OK;
@@ -940,6 +996,8 @@ static UINT xf_cliprdr_server_format_list_response(CliprdrClientContext* context
  */
 static UINT xf_cliprdr_server_format_data_request(CliprdrClientContext* context, CLIPRDR_FORMAT_DATA_REQUEST* formatDataRequest)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_server_format_data_request()");
+
 	xfCliprdrFormat* format = NULL;
 	UINT32 formatId = formatDataRequest->requestedFormatId;
 	xfClipboard* clipboard = (xfClipboard*) context->custom;
@@ -977,6 +1035,8 @@ static UINT xf_cliprdr_server_format_data_request(CliprdrClientContext* context,
  */
 static UINT xf_cliprdr_server_format_data_response(CliprdrClientContext* context, CLIPRDR_FORMAT_DATA_RESPONSE* formatDataResponse)
 {
+	WLog_DBG(TAG, "callback of xf_cliprdr_server_format_data_response()");
+
 	BOOL bSuccess;
 	BYTE* pSrcData;
 	BYTE* pDstData;
@@ -1078,6 +1138,8 @@ static UINT xf_cliprdr_server_format_data_response(CliprdrClientContext* context
 
 xfClipboard* xf_clipboard_new(xfContext* xfc)
 {
+	WLog_DBG(TAG, " calling xf_clipboard_new()");
+
 	int n;
 	rdpChannels* channels;
 	xfClipboard* clipboard;
@@ -1191,6 +1253,8 @@ xfClipboard* xf_clipboard_new(xfContext* xfc)
 
 void xf_clipboard_free(xfClipboard* clipboard)
 {
+	WLog_DBG(TAG, " calling xf_clipboard_free()");
+
 	int i;
 
 	if (!clipboard)
@@ -1221,6 +1285,8 @@ void xf_clipboard_free(xfClipboard* clipboard)
 
 void xf_cliprdr_init(xfContext* xfc, CliprdrClientContext* cliprdr)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_init()");
+
 	xfc->cliprdr = cliprdr;
 	xfc->clipboard->context = cliprdr;
 	cliprdr->custom = (void*) xfc->clipboard;
@@ -1235,6 +1301,8 @@ void xf_cliprdr_init(xfContext* xfc, CliprdrClientContext* cliprdr)
 
 void xf_cliprdr_uninit(xfContext* xfc, CliprdrClientContext* cliprdr)
 {
+	WLog_DBG(TAG, " calling xf_cliprdr_uninit()");
+
 	xfc->cliprdr = NULL;
 	cliprdr->custom = NULL;
 

@@ -100,8 +100,8 @@ UINT cliprdr_packet_send(cliprdrPlugin* cliprdr, wStream* s)
 	Stream_SetPosition(s, pos);
 
 #ifdef WITH_DEBUG_CLIPRDR
-	WLog_DBG(TAG, "Cliprdr Sending (%d bytes)", dataLen + 8);
-	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
+  winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
+  WLog_INFO(TAG, "Cliprdr Sending (%d bytes)", dataLen + 8);
 #endif
 
 	if (!cliprdr)
@@ -474,7 +474,8 @@ static UINT cliprdr_order_recv(cliprdrPlugin* cliprdr, wStream* s)
 	DEBUG_CLIPRDR("msgType: %s (%d), msgFlags: %d dataLen: %d",
 				  CB_MSG_TYPE_STRINGS[msgType], msgType, msgFlags, dataLen);
 #ifdef WITH_DEBUG_CLIPRDR
-	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
+  winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
+  WLog_INFO(TAG,"Cliprdr Receiving (%d bytes)", dataLen + 8);
 #endif
 
 	switch (msgType)

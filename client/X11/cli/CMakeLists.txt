@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(MODULE_NAME "xfreerdp-cli")
+#set(MODULE_NAME "xfreerdp-cli") # qtcreator is unable to find the output binary (for debugging) if this line is enabled
+set(MODULE_NAME "xfreerdp")
 set(MODULE_PREFIX "FREERDP_CLIENT_X11")
 
 include_directories(..)

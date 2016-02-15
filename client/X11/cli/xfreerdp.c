@@ -59,6 +59,11 @@ int main(int argc, char* argv[])
 
 	status = freerdp_client_settings_command_line_status_print(settings, status, argc, argv);
 
+#if defined(WITH_DEBUG_CLIPRDR) // defined in CMakeLists.txt from FreeRDP
+  // if logging with debug level is enabled in cliprdr, we also want to use the debug level
+  WLog_SetLogLevel(WLog_Get(FREERDP_TAG("client.x11")), WLOG_DEBUG);
+#endif
+
 	if (status)
 	{
 		if (settings->ListMonitors)
