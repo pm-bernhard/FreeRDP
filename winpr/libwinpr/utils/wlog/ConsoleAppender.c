@@ -55,10 +55,11 @@ static BOOL WLog_ConsoleAppender_WriteMessage(wLog* log, wLogAppender* appender,
 {
 	FILE* fp;
 	char prefix[WLOG_MAX_PREFIX_SIZE];
+	wLogConsoleAppender *consoleAppender;
 	if (!appender)
 		return FALSE;
 
-	wLogConsoleAppender *consoleAppender = (wLogConsoleAppender *)appender;
+	consoleAppender = (wLogConsoleAppender *)appender;
 
 
 	message->PrefixString = prefix;
@@ -147,6 +148,9 @@ static int g_DataId = 0;
 
 static BOOL WLog_ConsoleAppender_WriteDataMessage(wLog* log, wLogAppender* appender, wLogMessage* message)
 {
+#if defined(ANDROID)
+	return FALSE;
+#else
 	int DataId;
 	char* FullFileName;
 
@@ -158,12 +162,16 @@ static BOOL WLog_ConsoleAppender_WriteDataMessage(wLog* log, wLogAppender* appen
 	free(FullFileName);
 
 	return TRUE;
+#endif
 }
 
 static int g_ImageId = 0;
 
 static BOOL WLog_ConsoleAppender_WriteImageMessage(wLog* log, wLogAppender* appender, wLogMessage* message)
 {
+#if defined(ANDROID)
+	return FALSE;
+#else
 	int ImageId;
 	char* FullFileName;
 
@@ -176,12 +184,16 @@ static BOOL WLog_ConsoleAppender_WriteImageMessage(wLog* log, wLogAppender* appe
 	free(FullFileName);
 
 	return TRUE;
+#endif
 }
 
 static int g_PacketId = 0;
 
 static BOOL WLog_ConsoleAppender_WritePacketMessage(wLog* log, wLogAppender* appender, wLogMessage* message)
 {
+#if defined(ANDROID)
+	return FALSE;
+#else
 	int PacketId;
 	char* FullFileName;
 
@@ -199,6 +211,7 @@ static BOOL WLog_ConsoleAppender_WritePacketMessage(wLog* log, wLogAppender* app
 				message->PacketData, message->PacketLength, message->PacketFlags);
 
 	return TRUE;
+#endif
 }
 static BOOL WLog_ConsoleAppender_Set(wLogAppender* appender, const char *setting, void *value)
 {

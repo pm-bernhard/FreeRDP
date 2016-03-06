@@ -28,8 +28,10 @@ if(MBEDTLS_FOUND)
 	include_directories(${MBEDTLS_INCLUDE_DIR})
 endif()
 
-if (NOT MSVC)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
+if(NOT DEFINED BUILD_SHARED_LIBS)
+  if (NOT MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
+  endif()
 endif()
 
 add_library(${MODULE_NAME} STATIC ${${MODULE_PREFIX}_SRCS}) 

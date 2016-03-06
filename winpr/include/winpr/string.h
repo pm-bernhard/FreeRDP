@@ -153,6 +153,7 @@ WINPR_API int lstrcmpW(LPCWSTR lpString1, LPCWSTR lpString2);
 #endif
 
 #define	 sprintf_s	snprintf
+#define	 _snprintf	snprintf
 #define _scprintf(_fmt, ...) snprintf(NULL, 0, _fmt, ## __VA_ARGS__)
 
 #define _scprintf(_fmt, ...)	snprintf(NULL, 0, _fmt, ## __VA_ARGS__)
@@ -187,6 +188,8 @@ WINPR_API int ConvertLineEndingToLF(char* str, int size);
 WINPR_API char* ConvertLineEndingToCRLF(const char* str, int* size);
 
 WINPR_API char* StrSep(char** stringp, const char* delim);
+
+WINPR_API INT64 GetLine(char** lineptr, size_t* size, FILE* stream);
 
 #ifdef __cplusplus
 }

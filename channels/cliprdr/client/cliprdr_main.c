@@ -46,7 +46,7 @@ const char* const CB_MSG_TYPE_STRINGS[] =
 	"CB_CLIP_CAPS",
 	"CB_FILECONTENTS_REQUEST",
 	"CB_FILECONTENTS_RESPONSE",
-	"CB_LOCK_CLIPDATA"
+	"CB_LOCK_CLIPDATA",
 	"CB_UNLOCK_CLIPDATA"
 };
 
@@ -100,8 +100,9 @@ UINT cliprdr_packet_send(cliprdrPlugin* cliprdr, wStream* s)
 	Stream_SetPosition(s, pos);
 
 #ifdef WITH_DEBUG_CLIPRDR
-  winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
-  WLog_INFO(TAG, "Cliprdr Sending (%d bytes)", dataLen + 8);
+	WLog_INFO(TAG, "Cliprdr Sending (%d bytes)", dataLen + 8);
+	WLog_DBG(TAG, "Cliprdr Sending (%d bytes)", dataLen + 8);
+	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
 #endif
 
 	if (!cliprdr)
@@ -471,11 +472,11 @@ static UINT cliprdr_order_recv(cliprdrPlugin* cliprdr, wStream* s)
 	Stream_Read_UINT16(s, msgFlags); /* msgFlags (2 bytes) */
 	Stream_Read_UINT32(s, dataLen); /* dataLen (4 bytes) */
 
-	DEBUG_CLIPRDR("msgType: %s (%d), msgFlags: %d dataLen: %d",
-				  CB_MSG_TYPE_STRINGS[msgType], msgType, msgFlags, dataLen);
 #ifdef WITH_DEBUG_CLIPRDR
-  winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
-  WLog_INFO(TAG,"Cliprdr Receiving (%d bytes)", dataLen + 8);
+	WLog_INFO(TAG,"Cliprdr Receiving (%d bytes)", dataLen + 8);
+	WLog_DBG(TAG, "msgType: %s (%d), msgFlags: %d dataLen: %d",
+				  CB_MSG_TYPE_STRINGS[msgType], msgType, msgFlags, dataLen);
+	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
 #endif
 
 	switch (msgType)
@@ -911,7 +912,7 @@ UINT cliprdr_client_file_contents_response(CliprdrClientContext* context, CLIPRD
 	if (fileContentsResponse->dwFlags & FILECONTENTS_SIZE)
 		fileContentsResponse->cbRequested = sizeof(UINT64);
 
-	s = cliprdr_packet_new(CB_FILECONTENTS_REQUEST, 0,
+	s = cliprdr_packet_new(CB_FILECONTENTS_RESPONSE, fileContentsResponse->msgFlags,
 			4 + fileContentsResponse->cbRequested);
 
 	if (!s)

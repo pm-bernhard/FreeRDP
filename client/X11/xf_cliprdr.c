@@ -787,11 +787,11 @@ UINT xf_cliprdr_send_client_format_list(xfClipboard* clipboard)
 
 	for (i = 0; i < numFormats; i++)
 	{
-		UINT fID=clipboard->clientFormats[i].formatId;
-		char* fName = clipboard->clientFormats[i].formatName;
 		formats[i].formatId = clipboard->clientFormats[i].formatId;
 		formats[i].formatName = clipboard->clientFormats[i].formatName;
-		//printf("formatId: %d\n", formats[i].formatId);
+    //UINT fID=clipboard->clientFormats[i].formatId;
+    //char* fName = clipboard->clientFormats[i].formatName;
+    //printf("formatId: %d\n", formats[i].formatId);
 		//printf("formatName: %s\n", formats[i].formatName);
 		//WLog_ERR(TAG, "formatId: %d", formats[i].formatId);
 		//WLog_ERR(TAG, "formatName: %s", formats[i].formatName);

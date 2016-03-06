@@ -35,6 +35,7 @@
 #endif
 
 #ifdef WITH_XI
+#include <X11/extensions/XInput.h>
 #include <X11/extensions/XInput2.h>
 #endif
 
@@ -100,8 +101,6 @@
 
 #include <freerdp/log.h>
 #define TAG CLIENT_TAG("x11")
-
-static const size_t password_size = 512;
 
 static int (*_def_error_handler)(Display*, XErrorEvent*);
 static int _xf_error_handler(Display* d, XErrorEvent* ev);
@@ -935,6 +934,138 @@ void xf_check_extensions(xfContext* context)
 #endif
 }
 
+#ifdef WITH_XI
+/* Input device which does NOT have the correct mapping. We must disregard */
+/* this device when trying to find the input device which is the pointer.  */
+static const char TEST_PTR_STR [] = "Virtual core XTEST pointer";
+static const size_t TEST_PTR_LEN = sizeof (TEST_PTR_STR) / sizeof (char);
+
+/* Invalid device identifier which indicate failure. */
+static const int INVALID_XID = -1;
+#endif /* WITH_XI */
+
+static void xf_get_x11_button_map (xfContext* xfc, unsigned char* x11_map)
+{
+#ifdef WITH_XI
+	int opcode, event, error;
+	int xid;
+	XDevice* ptr_dev;
+	XExtensionVersion* version;
+	XDeviceInfo* devices1;
+	XIDeviceInfo* devices2;
+	int i, num_devices;
+
+	if (XQueryExtension (xfc->display, "XInputExtension", &opcode, &event, &error))
+	{
+		WLog_DBG(TAG, "Searching for XInput pointer device");
+		xid = INVALID_XID;
+		/* loop through every device, looking for a pointer */
+		version = XGetExtensionVersion (xfc->display, INAME);
+		if (version->major_version >= 2)
+		{
+			/* XID of pointer device using XInput version 2 */
+			devices2 = XIQueryDevice (xfc->display, XIAllDevices, &num_devices);
+			if (devices2)
+			{
+				for (i = 0; i < num_devices; ++i)
+				{
+					if ((devices2[i].use == XISlavePointer) &&
+					    (strncmp (devices2[i].name, TEST_PTR_STR, TEST_PTR_LEN) != 0))
+					{
+						xid = devices2[i].deviceid;
+						break;
+					}
+				}
+				XIFreeDeviceInfo (devices2);
+			}
+		}
+		else
+		{
+			/* XID of pointer device using XInput version 1 */
+			devices1 = XListInputDevices (xfc->display, &num_devices);
+			if (devices1)
+			{
+				for (i = 0; i < num_devices; ++i)
+				{
+					if ((devices1[i].use == IsXExtensionPointer) &&
+					    (strncmp (devices1[i].name, TEST_PTR_STR, TEST_PTR_LEN) != 0))
+					{
+						xid = devices1[i].id;
+						break;
+					}
+				}
+				XFreeDeviceList (devices1);
+			}
+		}
+		XFree (version);
+		/* get button mapping from input extension if there is a pointer device; */
+		/* otherwise leave unchanged.                                            */
+		if (xid != INVALID_XID)
+		{
+			WLog_DBG(TAG, "Pointer device: %d", xid);
+			ptr_dev = XOpenDevice (xfc->display, xid);
+			XGetDeviceButtonMapping (xfc->display, ptr_dev, x11_map, NUM_BUTTONS_MAPPED);
+			XCloseDevice (xfc->display, ptr_dev);
+		}
+		else
+		{
+			WLog_DBG(TAG, "No pointer device found!");
+		}
+	}
+	else
+#endif /* WITH_XI */
+	{
+		WLog_DBG(TAG, "Get global pointer mapping (no XInput)");
+		XGetPointerMapping (xfc->display, x11_map, NUM_BUTTONS_MAPPED);
+	}
+}
+
+/* Assignment of physical (not logical) mouse buttons to wire flags. */
+/* Notice that the middle button is 2 in X11, but 3 in RDP.          */
+static const int xf_button_flags[NUM_BUTTONS_MAPPED] = {
+	PTR_FLAGS_BUTTON1,
+	PTR_FLAGS_BUTTON3,
+	PTR_FLAGS_BUTTON2
+};
+
+static void xf_button_map_init (xfContext* xfc)
+{
+	/* loop counter for array initialization */
+	int physical;
+	int logical;
+
+	/* logical mouse button which is used for each physical mouse  */
+	/* button (indexed from zero). This is the default map.        */
+	unsigned char x11_map[NUM_BUTTONS_MAPPED] = {
+		Button1,
+		Button2,
+		Button3
+	};
+
+	/* query system for actual remapping */
+	if (!xfc->settings->UnmapButtons)
+	{
+		xf_get_x11_button_map (xfc, x11_map);
+	}
+
+	/* iterate over all (mapped) physical buttons; for each of them */
+	/* find the logical button in X11, and assign to this the       */
+	/* appropriate value to send over the RDP wire.                 */
+	for (physical = 0; physical < NUM_BUTTONS_MAPPED; ++physical)
+	{
+		logical = x11_map[physical];
+		if (Button1 <= logical && logical <= Button3)
+		{
+			xfc->button_map[logical-BUTTON_BASE] = xf_button_flags[physical];
+		}
+		else
+		{
+			WLog_ERR(TAG,"Mouse physical button %d is mapped to logical button %d",
+				physical, logical);
+		}
+	}
+}
+
 /**
  * Callback given to freerdp_connect() to process the pre-connect operations.
  * It will fill the rdp_freerdp structure (instance) with the appropriate options to use for the connection.
@@ -1058,6 +1189,7 @@ BOOL xf_pre_connect(freerdp* instance)
 	xfc->decorations = settings->Decorations;
 	xfc->grab_keyboard = settings->GrabKeyboard;
 	xfc->fullscreen_toggle = settings->ToggleFullscreen;
+	xf_button_map_init (xfc);
 
 	return TRUE;
 }
@@ -1223,158 +1355,6 @@ static void xf_post_disconnect(freerdp* instance)
 	xf_keyboard_free(xfc);
 }
 
-/** Callback set in the rdp_freerdp structure, and used to get the user's password,
- *  if required to establish the connection.
- *  This function is actually called in credssp_ntlmssp_client_init()
- *  @see rdp_server_accept_nego() and rdp_check_fds()
- *  @param instance - pointer to the rdp_freerdp structure that contains the connection settings
- *  @param username - unused
- *  @param password - on return: pointer to a character string that will be filled by the password entered by the user.
- *  				  Note that this character string will be allocated inside the function, and needs to be deallocated by the caller
- *  				  using free(), even in case this function fails.
- *  @param domain - unused
- *  @return TRUE if a password was successfully entered. See freerdp_passphrase_read() for more details.
- */
-static BOOL xf_authenticate_raw(freerdp* instance, BOOL gateway, char** username,
-		char** password, char** domain)
-{
-	const char* auth[] =
-	{
-		"Username: ",
-		"Domain:   ",
-		"Password: "
-	};
-	const char* gw[] =
-	{
-		"GatewayUsername: ",
-		"GatewayDomain:   ",
-		"GatewayPassword: "
-	};
-	const char** prompt = (gateway) ? gw : auth;
-
-	if (!username || !password || !domain)
-		return FALSE;
-
-	if (!*username)
-	{
-		size_t username_size = 0;
-		printf("%s", prompt[0]);
-		if (getline(username, &username_size, stdin) < 0)
-		{
-			WLog_ERR(TAG, "getline returned %s [%d]", strerror(errno), errno);
-			goto fail;
-		}
-
-		if (*username)
-		{
-			*username = StrSep(username, "\r");
-			*username = StrSep(username, "\n");
-		}
-	}
-
-	if (!*domain)
-	{
-		size_t domain_size = 0;
-		printf("%s", prompt[1]);
-		if (getline(domain, &domain_size, stdin) < 0)
-		{
-			WLog_ERR(TAG, "getline returned %s [%d]", strerror(errno), errno);
-			goto fail;
-		}
-
-		if (*domain)
-		{
-			*domain = StrSep(domain, "\r");
-			*domain = StrSep(domain, "\n");
-		}
-	}
-
-	if (!*password)
-	{
-		*password = calloc(password_size, sizeof(char));
-		if (!*password)
-			goto fail;
-
-		if (freerdp_passphrase_read(prompt[2], *password, password_size,
-			instance->settings->CredentialsFromStdin) == NULL)
-			goto fail;
-	}
-
-	return TRUE;
-
-fail:
-	free(*username);
-	free(*domain);
-	free(*password);
-
-	*username = NULL;
-	*domain = NULL;
-	*password = NULL;
-
-	return FALSE;
-}
-
-static BOOL xf_authenticate(freerdp* instance, char** username, char** password, char** domain)
-{
-	return xf_authenticate_raw(instance, FALSE, username, password, domain);
-}
-
-static BOOL xf_gw_authenticate(freerdp* instance, char** username, char** password, char** domain)
-{
-	return xf_authenticate_raw(instance, TRUE, username, password, domain);
-}
-
-/** Callback set in the rdp_freerdp structure, and used to make a certificate validation
- *  when the connection requires it.
- *  This function will actually be called by tls_verify_certificate().
- *  @see rdp_client_connect() and tls_connect()
- *  @param instance - pointer to the rdp_freerdp structure that contains the connection settings
- *  @param subject
- *  @param issuer
- *  @param fingerprint
- *  @return TRUE if the certificate is trusted. FALSE otherwise.
- */
-BOOL xf_verify_certificate(freerdp* instance, char* subject, char* issuer, char* fingerprint)
-{
-	char answer;
-
-	WLog_INFO(TAG, "Certificate details:");
-	WLog_INFO(TAG, "\tSubject: %s", subject);
-	WLog_INFO(TAG, "\tIssuer: %s", issuer);
-	WLog_INFO(TAG, "\tThumbprint: %s", fingerprint);
-	WLog_INFO(TAG, "The above X.509 certificate could not be verified, possibly because you do not have "
-			  "the CA certificate in your certificate store, or the certificate has expired. "
-			  "Please look at the documentation on how to create local certificate store for a private CA.");
-
-	while (1)
-	{
-		WLog_INFO(TAG, "Do you trust the above certificate? (Y/N) ");
-		answer = fgetc(stdin);
-
-		if (feof(stdin))
-		{
-			WLog_INFO(TAG, "Error: Could not read answer from stdin.");
-			if (instance->settings->CredentialsFromStdin)
-				WLog_INFO(TAG, " - Run without parameter \"--from-stdin\" to set trust.");
-			WLog_INFO(TAG, "");
-			return FALSE;
-		}
-
-		if (answer == 'y' || answer == 'Y')
-		{
-			return TRUE;
-		}
-		else if (answer == 'n' || answer == 'N')
-		{
-			break;
-		}
-
-		WLog_INFO(TAG, "");
-	}
-
-	return FALSE;
-}
-
 int xf_logon_error_info(freerdp* instance, UINT32 data, UINT32 type)
 {
 	xfContext* xfc = (xfContext*) instance->context;
@@ -1528,11 +1508,30 @@ void* xf_client_thread(void* param)
 
 	xfc = (xfContext*) instance->context;
 
-	/* Connection succeeded. --authonly ? */
-	if (instance->settings->AuthenticationOnly || !status)
+	/* --authonly ? */
+	if (instance->settings->AuthenticationOnly)
 	{
 		WLog_ERR(TAG, "Authentication only, exit status %d", !status);
-		exit_code = XF_EXIT_CONN_FAILED;
+		if (!status)
+		{
+			if (freerdp_get_last_error(instance->context) == FREERDP_ERROR_AUTHENTICATION_FAILED)
+				exit_code = XF_EXIT_AUTH_FAILURE;
+			else
+				exit_code = XF_EXIT_CONN_FAILED;
+		}
+		else
+			exit_code = XF_EXIT_SUCCESS;
+		goto disconnect;
+	}
+
+	if (!status)
+	{
+		WLog_ERR(TAG, "Freerdp connect error exit status %d", !status);
+		exit_code = freerdp_error_info(instance);
+		if (freerdp_get_last_error(instance->context) == FREERDP_ERROR_AUTHENTICATION_FAILED)
+			exit_code = XF_EXIT_AUTH_FAILURE;
+		else
+			exit_code = XF_EXIT_CONN_FAILED;
 		goto disconnect;
 	}
 
@@ -1643,7 +1642,7 @@ disconnect:
 
 DWORD xf_exit_code_from_disconnect_reason(DWORD reason)
 {
-	if (reason == 0 || (reason >= XF_EXIT_PARSE_ARGUMENTS && reason <= XF_EXIT_CONN_FAILED))
+	if (reason == 0 || (reason >= XF_EXIT_PARSE_ARGUMENTS && reason <= XF_EXIT_AUTH_FAILURE))
 		return reason;
 	/* License error set */
 	else if (reason >= 0x100 && reason <= 0x10A)
@@ -1803,9 +1802,10 @@ static BOOL xfreerdp_client_new(freerdp* instance, rdpContext* context)
 	instance->PreConnect = xf_pre_connect;
 	instance->PostConnect = xf_post_connect;
 	instance->PostDisconnect = xf_post_disconnect;
-	instance->Authenticate = xf_authenticate;
-	instance->GatewayAuthenticate = xf_gw_authenticate;
-	instance->VerifyCertificate = xf_verify_certificate;
+	instance->Authenticate = client_cli_authenticate;
+	instance->GatewayAuthenticate = client_cli_gw_authenticate;
+	instance->VerifyCertificate = client_cli_verify_certificate;
+	instance->VerifyChangedCertificate = client_cli_verify_changed_certificate;
 	instance->LogonErrorInfo = xf_logon_error_info;
 
 	settings = instance->settings;
