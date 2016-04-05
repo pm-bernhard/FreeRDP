@@ -58,7 +58,7 @@ if(FREERDP_VENDOR AND WITH_CLIENT)
 endif()
 
 
-add_subdirectory(RemoteDisplay)	
+#add_subdirectory(RemoteDisplay)	
 
 # Pick up other clients
 if(WITH_CLIENT)
