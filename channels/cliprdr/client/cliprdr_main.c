@@ -105,7 +105,7 @@ UINT cliprdr_packet_send(cliprdrPlugin* cliprdr, wStream* s)
 	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
 #endif
 
-	if (!cliprdr)
+  if (!cliprdr || !cliprdr->channelEntryPoints.pVirtualChannelWrite)
 	{
 		status = CHANNEL_RC_BAD_INIT_HANDLE;
 	}
