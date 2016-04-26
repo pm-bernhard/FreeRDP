@@ -152,9 +152,9 @@ static UINT cliprdr_process_general_capability(cliprdrPlugin* cliprdr, wStream* 
 	UINT32 generalFlags;
 	CLIPRDR_CAPABILITIES capabilities;
 	CLIPRDR_GENERAL_CAPABILITY_SET generalCapabilitySet;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
-	UINT error = CHANNEL_RC_OK;
+  UINT error = CHANNEL_RC_OK;
 
+  CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
 	if (!context)
 	{
 		WLog_ERR(TAG, "cliprdr_get_client_interface failed!");
@@ -255,8 +255,14 @@ static UINT cliprdr_process_clip_caps(cliprdrPlugin* cliprdr, wStream* s, UINT16
 static UINT cliprdr_process_monitor_ready(cliprdrPlugin* cliprdr, wStream* s, UINT16 length, UINT16 flags)
 {
 	CLIPRDR_MONITOR_READY monitorReady;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
-	UINT error = CHANNEL_RC_OK;
+  UINT error = CHANNEL_RC_OK;
+
+  CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
+  if (!context)
+  {
+    WLog_ERR(TAG, "cliprdr context is empty");
+    return ERROR_INTERNAL_ERROR;
+  }
 
 	WLog_Print(cliprdr->log, WLOG_DEBUG, "MonitorReady");
 
@@ -300,8 +306,14 @@ static UINT cliprdr_process_monitor_ready(cliprdrPlugin* cliprdr, wStream* s, UI
 static UINT cliprdr_process_filecontents_request(cliprdrPlugin* cliprdr, wStream* s, UINT32 length, UINT16 flags)
 {
 	CLIPRDR_FILE_CONTENTS_REQUEST request;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
 	UINT error = CHANNEL_RC_OK;
+
+	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
+	if (!context)
+	{
+		WLog_ERR(TAG, "cliprdr context is empty");
+		return ERROR_INTERNAL_ERROR;
+	}
 
 	WLog_Print(cliprdr->log, WLOG_DEBUG, "FileContentsRequest");
 
@@ -345,8 +357,14 @@ static UINT cliprdr_process_filecontents_request(cliprdrPlugin* cliprdr, wStream
 static UINT cliprdr_process_filecontents_response(cliprdrPlugin* cliprdr, wStream* s, UINT32 length, UINT16 flags)
 {
 	CLIPRDR_FILE_CONTENTS_RESPONSE response;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
 	UINT error = CHANNEL_RC_OK;
+
+	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
+	if (!context)
+	{
+		WLog_ERR(TAG, "cliprdr context is empty");
+		return ERROR_INTERNAL_ERROR;
+	}
 
 	WLog_Print(cliprdr->log, WLOG_DEBUG, "FileContentsResponse");
 
@@ -387,8 +405,14 @@ static UINT cliprdr_process_filecontents_response(cliprdrPlugin* cliprdr, wStrea
 static UINT cliprdr_process_lock_clipdata(cliprdrPlugin* cliprdr, wStream* s, UINT32 length, UINT16 flags)
 {
 	CLIPRDR_LOCK_CLIPBOARD_DATA lockClipboardData;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
 	UINT error = CHANNEL_RC_OK;
+
+	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
+	if (!context)
+	{
+		WLog_ERR(TAG, "cliprdr context is empty");
+		return ERROR_INTERNAL_ERROR;
+	}
 
 	WLog_Print(cliprdr->log, WLOG_DEBUG, "LockClipData");
 
@@ -425,8 +449,14 @@ static UINT cliprdr_process_lock_clipdata(cliprdrPlugin* cliprdr, wStream* s, UI
 static UINT cliprdr_process_unlock_clipdata(cliprdrPlugin* cliprdr, wStream* s, UINT32 length, UINT16 flags)
 {
 	CLIPRDR_UNLOCK_CLIPBOARD_DATA unlockClipboardData;
-	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
 	UINT error = CHANNEL_RC_OK;
+
+	CliprdrClientContext* context = cliprdr_get_client_interface(cliprdr);
+	if (!context)
+	{
+		WLog_ERR(TAG, "cliprdr context is empty");
+		return ERROR_INTERNAL_ERROR;
+	}
 
 	WLog_Print(cliprdr->log, WLOG_DEBUG, "UnlockClipData");
 
@@ -475,7 +505,7 @@ static UINT cliprdr_order_recv(cliprdrPlugin* cliprdr, wStream* s)
 #ifdef WITH_DEBUG_CLIPRDR
 	WLog_INFO(TAG,"Cliprdr Receiving (%d bytes)", dataLen + 8);
 	WLog_DBG(TAG, "msgType: %s (%d), msgFlags: %d dataLen: %d",
-				  CB_MSG_TYPE_STRINGS[msgType], msgType, msgFlags, dataLen);
+					CB_MSG_TYPE_STRINGS[msgType], msgType, msgFlags, dataLen);
 	winpr_HexDump(TAG, WLOG_DEBUG, Stream_Buffer(s), dataLen + 8);
 #endif
 
@@ -1219,11 +1249,11 @@ static UINT cliprdr_virtual_channel_event_disconnected(cliprdrPlugin* cliprdr)
 	UINT rc;
 
 	if (MessageQueue_PostQuit(cliprdr->queue, 0) && (WaitForSingleObject(cliprdr->thread, INFINITE) == WAIT_FAILED))
-    {
-        rc = GetLastError();
-        WLog_ERR(TAG, "WaitForSingleObject failed with error %lu", rc);
-        return rc;
-    }
+	{
+		rc = GetLastError();
+		WLog_ERR(TAG, "WaitForSingleObject failed with error %lu", rc);
+		return rc;
+	}
 
 	MessageQueue_Free(cliprdr->queue);
 	CloseHandle(cliprdr->thread);
