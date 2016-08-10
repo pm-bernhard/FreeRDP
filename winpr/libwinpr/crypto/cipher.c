@@ -65,6 +65,9 @@ WINPR_RC4_CTX* winpr_RC4_New(const BYTE* key, size_t keylen)
 
 BOOL winpr_RC4_Update(WINPR_RC4_CTX* ctx, size_t length, const BYTE* input, BYTE* output)
 {
+  if (!ctx)
+    return FALSE;
+
 #if defined(WITH_OPENSSL)
 	RC4((RC4_KEY*) ctx, length, input, output);
 #elif defined(WITH_MBEDTLS) && defined(MBEDTLS_ARC4_C)
