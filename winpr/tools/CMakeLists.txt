@@ -15,6 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(hash)
-add_subdirectory(makecert)
+#add_subdirectory(hash)
+#add_subdirectory(makecert)
 
