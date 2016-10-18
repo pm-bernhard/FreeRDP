@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-file(GLOB RDTK_HEADERS "rdtk/*.h")
-install(FILES ${RDTK_HEADERS} DESTINATION include/rdtk${RDTK_VERSION_MAJOR}/rdtk COMPONENT headers)
-
+if (NOT FREERDP_CUSTOM_INSTALL)
+  file(GLOB RDTK_HEADERS "rdtk/*.h")
+  install(FILES ${RDTK_HEADERS} DESTINATION include/rdtk${RDTK_VERSION_MAJOR}/rdtk COMPONENT headers)
+endif()

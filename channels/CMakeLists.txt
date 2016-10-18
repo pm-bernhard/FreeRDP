@@ -155,7 +155,9 @@ macro(add_channel_client_subsystem _channel_prefix _channel_name _subsystem _typ
 endmacro(add_channel_client_subsystem)
 
 macro(channel_install _targets _destination _export_target)
+  if (NOT FREERDP_CUSTOM_INSTALL)
 		install(TARGETS ${_targets} DESTINATION ${_destination} EXPORT ${_export_target})
+  endif()
 endmacro(channel_install)
 
 macro(server_channel_install _targets _destination)

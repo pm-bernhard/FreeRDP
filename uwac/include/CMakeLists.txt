@@ -15,5 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-file(GLOB UWAC_HEADERS "uwac/*.h")
-install(FILES ${UWAC_HEADERS} DESTINATION include/uwac${UWAC_API_VERSION}/uwac COMPONENT headers)
+if (NOT FREERDP_CUSTOM_INSTALL)
+  file(GLOB UWAC_HEADERS "uwac/*.h")
+  install(FILES ${UWAC_HEADERS} DESTINATION include/uwac${UWAC_API_VERSION}/uwac COMPONENT headers)
+endif()
