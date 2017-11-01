@@ -200,7 +200,7 @@ if(WITH_XFIXES)
 	set(${MODULE_PREFIX}_LIBS ${${MODULE_PREFIX}_LIBS} ${XFIXES_LIBRARIES})
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/resources)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../resources)
 
 set(${MODULE_PREFIX}_LIBS ${${MODULE_PREFIX}_LIBS} freerdp-client freerdp m)
 if (NOT APPLE)

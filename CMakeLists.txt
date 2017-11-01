@@ -39,7 +39,7 @@ set(CMAKE_COLOR_MAKEFILE ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Include our extra modules
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/)
 
 if((CMAKE_SYSTEM_NAME MATCHES "WindowsStore") AND (CMAKE_SYSTEM_VERSION MATCHES "10.0"))
 	set(UWP 1)
@@ -857,8 +857,8 @@ if(BUILD_TESTING)
 endif()
 
 # WinPR
-include_directories("${CMAKE_SOURCE_DIR}/winpr/include")
-include_directories("${CMAKE_BINARY_DIR}/winpr/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/winpr/include")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/winpr/include")
 
 if (${CMAKE_VERSION} VERSION_LESS 2.8.12)
 	set(PUBLIC_KEYWORD "")
@@ -928,17 +928,16 @@ endif()
 
 # Packaging
 
-set(CMAKE_CPACK_INCLUDE_FILE "CMakeCPack.cmake")
-
 if(NOT (VENDOR MATCHES "FreeRDP"))
 	if(DEFINED CLIENT_VENDOR_PATH)
-		if(EXISTS "${CMAKE_SOURCE_DIR}/${CLIENT_VENDOR_PATH}/CMakeCPack.cmake")
-			set(CMAKE_CPACK_INCLUDE_FILE "${CLIENT_VENDOR_PATH}/CMakeCPack.cmake")
+		if(EXISTS "${CMAKE_SOURCE_DIR}/${CLIENT_VENDOR_PATH}/CMakeCPackOptions.cmake.in")
+			set(CMAKE_CPACK_INCLUDE_FILE "${CMAKE_SOURCE_DIR}/${CLIENT_VENDOR_PATH}/CMakeCPackOptions.cmake.in")
 		endif()
 	endif()
 endif()
 
-#message("VENDOR: ${VENDOR} CLIENT_VENDOR_PATH: ${CLIENT_VENDOR_PATH} CMAKE_CPACK_INCLUDE_FILE: ${CMAKE_CPACK_INCLUDE_FILE}")
+#message("CMAKE_SOURCE_DIR:" ${CMAKE_SOURCE_DIR} " VENDOR: ${VENDOR} CLIENT_VENDOR_PATH: ${CLIENT_VENDOR_PATH} CMAKE_CPACK_INCLUDE_FILE: ${CMAKE_CPACK_INCLUDE_FILE}")
+
 
 include(${CMAKE_CPACK_INCLUDE_FILE})
 

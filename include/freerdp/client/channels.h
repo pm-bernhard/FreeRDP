@@ -24,6 +24,7 @@
 #include <freerdp/addin.h>
 #include <freerdp/channels/channels.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
