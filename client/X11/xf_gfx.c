@@ -293,6 +293,9 @@ static UINT xf_CreateSurface(RdpgfxClientContext* context,
 		goto error_surface_image;
 	}
 
+	surface->image->byte_order = LSBFirst;
+	surface->image->bitmap_bit_order = LSBFirst;
+
 	surface->gdi.outputMapped = FALSE;
 	region16_init(&surface->gdi.invalidRegion);
 	if (context->SetSurfaceData(context, surface->gdi.surfaceId, (void*) surface) != CHANNEL_RC_OK)
@@ -328,6 +331,9 @@ static UINT xf_DeleteSurface(RdpgfxClientContext* context,
 
 	if (surface)
 	{
+#ifdef WITH_GFX_H264
+		h264_context_free(surface->gdi.h264);
+#endif
 		XFree(surface->image);
 		_aligned_free(surface->gdi.data);
 		_aligned_free(surface->stage);

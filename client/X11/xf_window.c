@@ -105,6 +105,16 @@ struct _PropMotifWmHints
 };
 typedef struct _PropMotifWmHints PropMotifWmHints;
 
+static void xf_SetWindowTitleText(xfContext* xfc, Window window, const char* name)
+{
+	const size_t i = strlen(name);
+	XStoreName(xfc->display, window, name);
+	Atom wm_Name = xfc->_NET_WM_NAME;
+	Atom utf8Str = xfc->UTF8_STRING;
+	XChangeProperty(xfc->display, window, wm_Name, utf8Str, 8,
+	                PropModeReplace, (const unsigned char*)name, (int)i);
+}
+
 /**
  * Post an event from the client to the X server
  */
@@ -328,7 +338,7 @@ static void xf_SetWindowPID(xfContext* xfc, Window window, pid_t pid)
 	                32, PropModeReplace, (BYTE*) &pid, 1);
 }
 
-static const char* get_shm_id()
+static const char* get_shm_id(void)
 {
 	static char shm_id[64];
 	sprintf_s(shm_id, sizeof(shm_id), "/com.freerdp.xfreerdp.tsmf_%016X",
@@ -336,13 +346,13 @@ static const char* get_shm_id()
 	return shm_id;
 }
 
-Window xf_CreateDummyWindow(xfContext *xfc)
+Window xf_CreateDummyWindow(xfContext* xfc)
 {
 	return XCreateSimpleWindow(xfc->display, DefaultRootWindow(xfc->display),
-			0, 0, 1, 1, 0, 0, 0);
+	                           0, 0, 1, 1, 0, 0, 0);
 }
 
-void xf_DestroyDummyWindow(xfContext *xfc, Window window)
+void xf_DestroyDummyWindow(xfContext* xfc, Window window)
 {
 	if (window)
 		XDestroyWindow(xfc->display, window);
@@ -462,7 +472,7 @@ xfWindow* xf_CreateDesktopWindow(xfContext* xfc, char* name, int width,
 		            settings->DesktopPosY);
 	}
 
-	XStoreName(xfc->display, window->handle, name);
+	xf_SetWindowTitleText(xfc, window->handle, name);
 	return window;
 }
 
@@ -576,33 +586,18 @@ void xf_SetWindowStyle(xfContext* xfc, xfAppWindow* appWindow, UINT32 style,
 	                XA_ATOM, 32, PropModeReplace, (BYTE*) &window_type, 1);
 }
 
-void xf_SetWindowText(xfContext* xfc, xfAppWindow* appWindow, char* name)
+void xf_SetWindowText(xfContext* xfc, xfAppWindow* appWindow, const char* name)
 {
-	const size_t i = strlen(name);
-	XStoreName(xfc->display, appWindow->handle, name);
-	Atom wm_Name = xfc->_NET_WM_NAME;
-	Atom utf8Str = xfc->UTF8_STRING;
-	XChangeProperty(xfc->display, appWindow->handle, wm_Name, utf8Str, 8,
-	                PropModeReplace, (unsigned char*)name, i);
+	xf_SetWindowTitleText(xfc, appWindow->handle, name);
 }
 
-void xf_FixWindowCoordinates(xfContext* xfc, int* x, int* y, int* width,
+static void xf_FixWindowCoordinates(xfContext* xfc, int* x, int* y, int* width,
                              int* height)
 {
 	int vscreen_width;
 	int vscreen_height;
 	vscreen_width = xfc->vscreen.area.right - xfc->vscreen.area.left + 1;
 	vscreen_height = xfc->vscreen.area.bottom - xfc->vscreen.area.top + 1;
-
-	if (*width < 1)
-	{
-		*width = 1;
-	}
-
-	if (*height < 1)
-	{
-		*height = 1;
-	}
 
 	if (*x < xfc->vscreen.area.left)
 	{
@@ -624,6 +619,16 @@ void xf_FixWindowCoordinates(xfContext* xfc, int* x, int* y, int* width,
 	if (*height > vscreen_height)
 	{
 		*height = vscreen_height;
+	}
+
+	if (*width < 1)
+	{
+		*width = 1;
+	}
+
+	if (*height < 1)
+	{
+		*height = 1;
 	}
 }
 
@@ -958,7 +963,7 @@ void xf_UpdateWindowArea(xfContext* xfc, xfAppWindow* appWindow, int x, int y,
 {
 	int ax, ay;
 
-        if (appWindow == NULL)
+	if (appWindow == NULL)
 		return;
 
 	ax = x + appWindow->windowOffsetX;
