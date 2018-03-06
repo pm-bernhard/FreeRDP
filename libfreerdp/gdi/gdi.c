@@ -1137,7 +1137,7 @@ static BOOL gdi_init_primary(rdpGdi* gdi, UINT32 stride, UINT32 format,
 		                       gdi->stride,
 		                       buffer, pfree);
 	}
-
+        // TODO: ADD Error Handling!
 	gdi->stride = gdi->primary->bitmap->scanline;
 
 	if (!gdi->primary->bitmap)
